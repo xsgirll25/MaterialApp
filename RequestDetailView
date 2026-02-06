@@ -1,0 +1,50 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+struct RequestDetailView: View {
+    let request: MaterialRequest
+    var body: some View {
+        Form {
+            Section("Материал") {
+                Label(request.materialName, systemImage: "cube.fill")
+                Label("\(String(format: "%.1f", request.quantity)) \(request.unit)", systemImage: "number")
+                Label(request.materialType.rawValue, systemImage: "tag.fill")
+            }
+            Section("Заявитель") {
+                Label(request.workerName, systemImage: "person.fill")
+                Label(request.department, systemImage: "building.2.fill")
+            }
+            Section("Детали") {
+                Label("Срочность: \(request.urgency.rawValue)", systemImage: "clock.fill")
+                Label("Статус: \(request.status.rawValue)", systemImage: "list.bullet")
+                Text(request.description.isEmpty ? "Нет описания" : request.description)
+            }
+            Section("Дата") {
+                Label("Создано: \(request.dateRequested.formatted(date: .abbreviated, time: .shortened))", systemImage: "calendar")
+                
+                if let completed = request.dateCompleted {
+                    Label("Завершено: \(completed.formatted(date: .abbreviated, time: .shortened))", systemImage: "checkmark.circle")
+                }
+            }
+        }
+        .navigationTitle("Карточка заявки")
+    }
+}
+#Preview {
+    RequestDetailView(request: MaterialRequest(
+        workerName: "Иван Петров",
+        department: "Отдел снабжения",
+        materialType: .cement,
+        materialName: "Цемент М500",
+        quantity: 20,
+        unit: "тн",
+        urgency: .high,
+        description: "Необходимо срочно к понедельнику",
+        dateRequested: Date()
+    ))
+}
