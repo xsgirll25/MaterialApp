@@ -1,0 +1,63 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+
+struct LoginView: View {
+    @EnvironmentObject var userManager: UserManager
+    @State private var email = ""
+    @State private var password = ""
+    @State private var showingAlert = false
+    var body: some View {
+        VStack(spacing: 24) {
+            Text("MaterialOrderApp")
+                .font(.largeTitle).bold()
+                .padding(.bottom, 10)
+            Text("Вход в систему")
+                .font(.title3)
+                .foregroundColor(.secondary)
+            TextField("Email", text: $email)
+                .textFieldStyle(.roundedBorder)
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
+                .textInputAutocapitalization(.never)
+            SecureField("Пароль", text: $password)
+                .textFieldStyle(.roundedBorder)
+            Button("Войти") {
+                login()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.blue)
+            .alert("Ошибка", isPresented: $showingAlert) {
+                Button("OK") {}
+            } message: {
+                Text("Введите email и пароль.")
+            }
+            Spacer()
+        }
+        .padding()
+    }
+    private func login() {
+        guard !email.isEmpty && !password.isEmpty else {
+            showingAlert = true
+            return
+        }
+        
+        // Создаём пользователя и сохраняем
+        let user = UserProfile(
+            name: "Иван Петров",
+            department: "Строительный отдел",
+            email: email,
+            role: "Прораб"
+        )
+        userManager.currentUser = user
+    }
+}
+#Preview {
+    LoginView()
+        .environmentObject(UserManager())
+}
