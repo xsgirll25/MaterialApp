@@ -1,0 +1,15 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+import Foundation
+struct WarehouseItem: Identifiable, Codable, Equatable {
+    var id = UUID()
+    var material: BuildingMaterial
+    var name: String
+    var quantity: Double
+    var unit: String
+}
