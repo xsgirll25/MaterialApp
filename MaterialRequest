@@ -1,0 +1,38 @@
+//
+//  MaterialRequest.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+
+import Foundation
+
+enum RequestStatus: String, CaseIterable, Codable {
+    case pending = "⏳ Ожидает"
+    case inProgress = "⚙️ В процессе"
+    case completed = "✅ Завершено"
+}
+// ✅ 1. Модель MaterialRequest
+struct MaterialRequest: Identifiable, Codable {
+    
+    var id = UUID()
+    let workerName: String
+    let department: String
+    let materialType: BuildingMaterial // добавить эту строку
+    let materialName: String
+    let quantity: Double
+    let unit: String
+    let urgency: UrgencyLevel
+    let description: String
+    let dateRequested: Date
+    var status: RequestStatus = .pending // ✅ Статус выполнения
+    var dateCompleted: Date?   // ✅ Дата исполнения
+    
+   enum UrgencyLevel: String, CaseIterable, Codable {
+        case low = "Низкая"
+        case medium = "Средняя"
+        case high = "Высокая"
+        case critical = "Критическая"
+    }
+}
