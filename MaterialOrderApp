@@ -1,0 +1,27 @@
+//
+//  MaterialOrderAppApp.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+
+@main
+struct MaterialOrderApp: App {
+    @StateObject private var userManager = UserManager()
+    
+    var body: some Scene {
+        WindowGroup {
+            if let _ = userManager.currentUser {
+                // Если пользователь уже вошёл — показываем главные вкладки
+                ContentView()
+                    .environmentObject(userManager)
+            } else {
+                // Если нет — экран входа
+                LoginView()
+                    .environmentObject(userManager)
+            }
+        }
+    }
+}
