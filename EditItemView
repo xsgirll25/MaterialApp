@@ -1,0 +1,50 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+
+struct EditItemView: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var warehouse: WarehouseManager
+    var item: WarehouseItem
+    @State private var newQuantityString = ""
+    var body: some View {
+        Form {
+            Section("Текущий материал") {
+                Text(item.name)
+                Text(item.material.rawValue)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Section("Изменить количество") {
+                TextField("Новое количество", text: $newQuantityString)
+                    .keyboardType(.decimalPad)
+            }
+        }
+        .navigationTitle("Изменить остаток")
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Сохранить") {
+                    saveChanges()
+                }
+            }
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Отмена") {
+                    dismiss()
+                }
+            }
+        }
+        .onAppear {
+            newQuantityString = String(Int(item.quantity))
+        }
+    }
+    private func saveChanges() {
+        guard let newQuantity = Double(newQuantityString) else { return }
+        warehouse.updateQuantity(for: item, newQuantity: newQuantity)
+        dismiss()
+    }
+}
