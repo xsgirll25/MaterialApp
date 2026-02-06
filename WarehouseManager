@@ -1,0 +1,60 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+import Foundation
+internal import SwiftUI
+internal import Combine
+
+final class WarehouseManager: ObservableObject {
+    @Published var items: [WarehouseItem] = [] {
+        didSet { saveItems() }
+    }
+    private let storageKey = "SavedWarehouseItems"
+    init() {
+        loadItems()
+        // Если хранилище пустое — добавляем начальные данные
+        if items.isEmpty {
+            items = [
+                WarehouseItem(material: .cement, name: "Цемент М500", quantity: 120, unit: "тн"),
+                WarehouseItem(material: .sand, name: "Песок строительный", quantity: 300, unit: "м³"),
+                WarehouseItem(material: .bricks, name: "Кирпич красный", quantity: 2500, unit: "шт")
+            ]
+            saveItems()
+        }
+    }
+    // Добавление нового материала
+    func addItem(_ item: WarehouseItem) {
+        items.append(item)
+    }
+    // Изменение количества
+    func updateQuantity(for item: WarehouseItem, newQuantity: Double) {
+        if let index = items.firstIndex(of: item) {
+            items[index].quantity = newQuantity
+        }
+    }
+    // Удаление
+    func deleteItem(at offsets: IndexSet) {
+        items.remove(atOffsets: offsets)
+    }
+    // MARK: - Локальное хранение
+    private func saveItems() {
+        do {
+            let data = try JSONEncoder().encode(items)
+            UserDefaults.standard.set(data, forKey: storageKey)
+        } catch {
+            print("Ошибка сохранения склада: \(error)")
+        }
+    }
+    private func loadItems() {
+        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
+        do {
+            items = try JSONDecoder().decode([WarehouseItem].self, from: data)
+        } catch {
+            print("Ошибка загрузки склада: \(error)")
+        }
+    }
+}
