@@ -1,0 +1,80 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+struct ProfileView: View {
+    @EnvironmentObject var userManager: UserManager
+    @State private var isEditing = false
+    @State private var name = ""
+    @State private var department = ""
+    @State private var role = ""
+    var body: some View {
+        NavigationStack {
+            if let user = userManager.currentUser {
+                Form {
+                    Section("Профиль") {
+                        if isEditing {
+                            TextField("Имя", text: $name)
+                            TextField("Отдел", text: $department)
+                            TextField("Должность", text: $role)
+                        } else {
+                            Label(user.name, systemImage: "person.fill")
+                            Label(user.department, systemImage: "building.2")
+                            Label(user.role, systemImage: "briefcase.fill")
+                        }
+                    }
+                    Section("Контакты") {
+                        Label(user.email, systemImage: "envelope.fill")
+                    }
+                    if isEditing {
+                        Section {
+                            Button("Сохранить изменения") {
+                                saveChanges()
+                                isEditing = false
+                            }
+                            .tint(.green)
+                        }
+                    } else {
+                        Section {
+                            Button("Редактировать профиль") {
+                                name = user.name
+                                department = user.department
+                                role = user.role
+                                isEditing = true
+                            }
+                        }
+                    }
+                    Section {
+                        Button("Выйти из аккаунта", role: .destructive) {
+                            userManager.logout()
+                        }
+                    }
+                }
+                .navigationTitle("Профиль")
+            } else {
+                VStack(spacing: 20) {
+                    Text("Вы не авторизованы")
+                        .font(.headline)
+                    NavigationLink("Войти", destination: LoginView())
+                        .buttonStyle(.borderedProminent)
+                }
+                .navigationTitle("Профиль")
+            }
+        }
+    }
+    private func saveChanges() {
+        // Сохраняем изменения в менеджере
+        let newName = name.trimmingCharacters(in: .whitespaces)
+        let newDepartment = department.trimmingCharacters(in: .whitespaces)
+        let newRole = role.trimmingCharacters(in: .whitespaces)
+        userManager.updateUser(name: newName, department: newDepartment, role: newRole)
+    }
+}
+#Preview {
+    ProfileView()
+        .environmentObject(UserManager())
+}
