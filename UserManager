@@ -1,0 +1,54 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+import Foundation
+internal import SwiftUI
+internal import Combine
+
+final class UserManager: ObservableObject {
+    @Published var currentUser: UserProfile? {
+        didSet {
+            saveUser()
+        }
+    }
+    private let userKey = "SavedUserProfile"
+    init() {
+        loadUser()
+    }
+    func saveUser() {
+        guard let user = currentUser else { return }
+        do {
+            let data = try JSONEncoder().encode(user)
+            UserDefaults.standard.set(data, forKey: userKey)
+        } catch {
+            print("Ошибка сохранения профиля: \(error)")
+        }
+    }
+    func loadUser() {
+        guard let data = UserDefaults.standard.data(forKey: userKey) else {
+            currentUser = nil
+            return
+        }
+        do {
+            currentUser = try JSONDecoder().decode(UserProfile.self, from: data)
+        } catch {
+            print("Ошибка загрузки профиля: \(error)")
+            currentUser = nil
+        }
+    }
+    func updateUser(name: String, department: String, role: String) {
+        guard var user = currentUser else { return }
+        user.name = name
+        user.department = department
+        user.role = role
+        currentUser = user
+    }
+    func logout() {
+        UserDefaults.standard.removeObject(forKey: userKey)
+        currentUser = nil
+    }
+}
