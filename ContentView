@@ -1,0 +1,51 @@
+//
+//  ContentView.swift
+//  XS2
+//
+//  Created by Mac on 05.02.2026.
+//
+
+import Foundation
+internal import SwiftUI
+internal import Combine
+
+struct ContentView: View {
+    var body: some View {
+        TabView {
+            
+            // 1. Новая заявка
+            DemoRequestForm()
+                .tabItem {
+                    Label("Новая", systemImage: "plus.circle.fill")
+                }
+            
+            // 2. История заявок
+            DemoRequestsListView()
+                .tabItem {
+                    Label("Заявки", systemImage: "list.bullet.rectangle.portrait")
+                }
+            
+            // 3. Складские остатки
+            WarehouseView()
+                .tabItem {
+                    Label("Склад", systemImage: "cube.box.fill")
+                }
+            
+            // 4. Профиль пользователя
+            ProfileView()
+                .tabItem {
+                    Label("Профиль", systemImage: "person.crop.circle")
+                }
+        }
+    }
+}
+
+// ✅ Модели тоже internal
+struct TestResponse: Codable {
+    let slideshow: Slideshow
+}
+
+struct Slideshow: Codable {
+    let title: String
+    let author: String
+}
