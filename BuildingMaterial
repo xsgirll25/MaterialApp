@@ -1,0 +1,146 @@
+//
+//  LocalStorageManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+import Foundation
+
+enum BuildingMaterial: String, CaseIterable, Codable {
+// Вяжущие материалы
+    case cement = "Цемент"
+    case lime = "Известь"
+    case gypsum = "Гипс"
+
+// Заполнители
+    case sand = "Песок"
+    case gravel = "Щебень"
+    case crushedStone = "Дробленый камень"
+// Кирпич и блоки
+    case bricks = "Кирпич красный"
+    case whiteBricks = "Кирпич белый"
+    case silicateBricks = "Кирпич силикатный"
+    case cinder = "Шлакоблоки"
+    case foamBlocks = "Газобетонные блоки"
+    case concreteBlocks = "Бетонные блоки"
+// Кровельные материалы
+    case slate = "Шифер"
+    case roofingFelt = "Рубероид"
+    case metalTile = "Металлочерепица"
+    case bitumenShingles = "Битумная черепица"
+    case ceramicTile = "Керамическая черепица"
+// Изоляционные материалы
+    case mineralWool = "Минеральная вата"
+    case foam = "Пенопласт"
+    case expandedPolystyrene = "Экструдированный пенополистирол"
+    case fiberGlass = "Стекловата"
+    case perlite = "Перлит"
+// Отделочные материалы
+    case cement_plaster = "Цементная штукатурка"
+    case gypsum_plaster = "Гипсовая штукатурка"
+    case paint = "Краска"
+    case wallpaper = "Обои"
+    case tiles = "Плитка"
+    case laminate = "Ламинат"
+    case parquet = "Паркет"
+    case linoleum = "Линолеум"
+// Электромонтажные материалы
+    case wiring = "Электропроводка"
+    case cable = "Кабель"
+    case conduit = "Кабель-канал"
+    case outlets = "Розетки и выключатели"
+    case panels = "Распределительные панели"
+// Сантехнические материалы
+    case pipes = "Трубы"
+    case pvcPipes = "ПВХ трубы"
+    case metalPipes = "Металлические трубы"
+    case fittings = "Фитинги"
+    case valves = "Краны и вентили"
+    case radiators = "Радиаторы"
+// Строительное оборудование и крепеж
+    case nails = "Гвозди"
+    case screws = "Саморезы"
+    case bolts = "Болты"
+    case anchors = "Анкеры"
+    case dowels = "Дюбеля"
+// Бетонные изделия
+    case concreteSlabs = "Бетонные плиты"
+    case beams = "Бетонные балки"
+    case pipes_concrete = "Бетонные трубы"
+    case curbs = "Бордюры"
+// Деревянные материалы
+    case lumber = "Пиломатериал"
+    case boards = "Доски"
+    case beams_wood = "Брусья"
+    case plywood = "Фанера"
+    case osb = "ОСБ"
+// Металлические материалы
+    case steelRebar = "Арматура стальная"
+    case steelSheet = "Листовая сталь"
+    case steelProfiled = "Профилированный металл"
+    case mesh = "Сетка металлическая"
+// Гидроизоляция
+    case waterproofing = "Гидроизоляция"
+    case membranes = "Мембраны"
+    case sealant = "Герметик"
+// Стеклянные изделия
+    case glassPanes = "Стеклопакеты"
+    case mirrors = "Зеркала"
+// Прочее
+    case adhesive = "Клеевые смеси"
+    case leveling = "Выравнивающие смеси"
+    case grout = "Затирка"
+    case reinforcedGlass = "Сетка стеклотканевая"
+}
+// Группировка материалов по категориям
+struct MaterialCategory {
+    let name: String
+    let materials: [BuildingMaterial]
+}
+
+    let materialCategories: [MaterialCategory] = [
+MaterialCategory(
+    name: "Вяжущие материалы",materials: [.cement, .lime, .gypsum]),
+MaterialCategory(
+    name: "Заполнители",
+materials: [.sand, .gravel, .crushedStone]),
+MaterialCategory(
+    name: "Кирпич и блоки",
+materials: [.bricks, .whiteBricks, .silicateBricks, .cinder, .foamBlocks, .concreteBlocks]),
+MaterialCategory(
+    name: "Кровельные материалы",
+materials: [.slate, .roofingFelt, .metalTile, .bitumenShingles, .ceramicTile]),
+MaterialCategory(
+    name: "Изоляция",
+materials: [.mineralWool, .foam, .expandedPolystyrene, .fiberGlass, .perlite]),
+MaterialCategory(
+    name: "Отделка",materials: [.cement_plaster, .gypsum_plaster, .
+paint, .wallpaper, .tiles, .laminate, .parquet, .linoleum]),
+MaterialCategory(
+    name: "Электромонтажные",
+materials: [.wiring, .cable, .conduit, .outlets, .panels]),
+MaterialCategory(
+    name: "Сантехника",
+materials: [.pipes, .pvcPipes, .metalPipes, .fittings, .valves, .radiators]),
+MaterialCategory(
+    name: "Крепеж",
+materials: [.nails, .screws, .bolts, .anchors, .dowels]),
+MaterialCategory(
+    name: "Бетонные изделия",
+materials: [.concreteSlabs, .beams, .pipes_concrete, .curbs]),
+MaterialCategory(
+    name: "Деревянные Материалы",
+materials: [.lumber, .boards, .beams_wood, .plywood, .osb]),
+MaterialCategory(
+    name: "Металлические материалы",
+materials: [.steelRebar, .steelSheet, .steelProfiled, .mesh]),
+MaterialCategory(
+    name: "Гидроизоляция",
+materials: [.waterproofing, .membranes, .sealant]),
+MaterialCategory(
+    name: "Стеклянные изделия",
+materials: [.glassPanes, .mirrors]),
+MaterialCategory(
+    name: "Прочее",materials: [.adhesive,.leveling,.grout,  .reinforcedGlass])
+]
