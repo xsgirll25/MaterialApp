@@ -1,0 +1,110 @@
+//
+//  LocalStorageManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+import Foundation
+internal import Combine
+internal import SwiftUI
+import MessageUI
+
+
+ class LocalStorageManager: ObservableObject {
+    @Published var savedRequests: [MaterialRequest] = []
+    
+    private let userDefaults = UserDefaults.standard
+    private let storageKey = "SavedMaterialRequests"
+    
+    init() {
+        loadRequests()
+    }
+    
+    func saveRequest(_ request: MaterialRequest) {
+        savedRequests.append(request)
+        saveToUserDefaults()
+        objectWillChange.send()
+    }
+    
+    func deleteRequest(at offsets: IndexSet) {
+        savedRequests.remove(atOffsets: offsets)
+        saveToUserDefaults()
+        objectWillChange.send()
+    }
+    
+    func saveRequests() {
+        saveToUserDefaults()
+        objectWillChange.send()
+    }
+    
+    func sendEmailNotification(request: MaterialRequest,
+                              onDismiss: @escaping (MFMailComposeResult) -> Void) {
+        guard MFMailComposeViewController.canSendMail() else {
+            let notificationText = notificationText(for: request)
+            UIPasteboard.general.string = notificationText
+            print("📋 Email недоступен. Текст скопирован в буфер.")
+            return
+        }
+        
+        _ = configureMailComposer(for: request)
+        // Показывать через MailComposeView с callback
+        print("📧 Email готов для: \(request.materialName)")
+    }
+    
+    func configureMailComposer(for request: MaterialRequest) -> MFMailComposeViewController {
+        let composer = MFMailComposeViewController()
+        
+        composer.setSubject("✅ Заявка завершена: \(request.materialName)")
+        composer.setMessageBody(notificationText(for: request), isHTML: false)
+        composer.setToRecipients(["warehouse@company.com", "manager@company.com"])
+        
+        return composer
+    }
+    
+    private func notificationText(for request: MaterialRequest) -> String {
+        return """
+        ✅ ЗАЯВКА ВЫПОЛНЕНА
+        
+        Материал: \(request.materialName)
+        Количество: \(String(format: "%.1f", request.quantity)) \(request.unit)
+        Исполнитель: \(request.workerName), \(request.department)
+        Тип: \(request.materialType.rawValue)
+        Приоритет: \(request.urgency.rawValue)
+        Выполнено: \(request.dateCompleted?.formatted(date: .abbreviated, time: .shortened) ?? "Неизвестно")
+        
+        ---
+        MaterialOrderApp
+        """
+    }
+    
+    private func loadRequests() {
+        guard let data = userDefaults.data(forKey: storageKey) else { return }
+        do {
+            savedRequests = try JSONDecoder().decode([MaterialRequest].self, from: data)
+        } catch {
+            print("Ошибка загрузки запросов: \(error)")
+            savedRequests = []
+        }
+    }
+    
+    private func saveToUserDefaults() {
+        do {
+            let data = try JSONEncoder().encode(savedRequests)
+            userDefaults.set(data, forKey: storageKey)
+        } catch {
+            print("Ошибка сохранения запросов: \(error)")
+        }
+    }
+}
+
+// MARK: - Упрощённый MailComposeView (без NSObject проблем)
+struct MailComposeView: UIViewControllerRepresentable {
+    let mailComposer: MFMailComposeViewController
+    
+    func makeUIViewController(context: Context) -> MFMailComposeViewController {
+        return mailComposer
+    }
+    
+    func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: Context) {}
+}
