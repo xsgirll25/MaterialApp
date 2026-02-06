@@ -1,0 +1,163 @@
+//
+//  RequestsListView.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+//
+//  RequestsListView.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+
+struct DemoRequestsListView: View {
+    @StateObject private var storageManager = LocalStorageManager()
+    @State private var isEditing = false
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(storageManager.savedRequests, id: \.id) { request in
+                    NavigationLink(destination: RequestDetailView(request: request)) {
+                        RequestRowView(
+                            request: request,
+                            isEditing: isEditing,
+                            storageManager: storageManager
+                        )
+                    }
+                    
+                }
+                    .onDelete(perform: deleteRequests)
+            }
+                .navigationTitle("История заявок (\(storageManager.savedRequests.count))")
+                .toolbar {
+                    Button(isEditing ? "Готово" : "Править") {
+                        withAnimation {
+                            isEditing.toggle()
+                        }
+                    }
+                }
+            }
+        }
+        
+    private func deleteRequests(at offsets: IndexSet) {
+            withAnimation {
+                storageManager.deleteRequest(at: offsets)
+            }
+        }
+    }
+    
+    struct RequestRowView: View {
+        let request: MaterialRequest
+        let isEditing: Bool
+        let storageManager: LocalStorageManager
+        @State private var selectedStatus: RequestStatus
+        
+        init(request: MaterialRequest, isEditing: Bool, storageManager: LocalStorageManager) {
+            self.request = request
+            self.isEditing = isEditing
+            self.storageManager = storageManager
+            _selectedStatus = State(initialValue: request.status)
+        }
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(request.materialName)
+                            .font(.headline)
+                        Text("\(request.workerName), \(request.department)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(request.materialType.rawValue)
+                            .font(.caption2)
+                    }
+                    Spacer()
+                    Text("\(request.quantity, specifier: "%.1f") \(request.unit)")
+                        .font(.headline)
+                    if isEditing {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundColor(.red)
+                    }
+                }
+                
+                HStack {
+                    Text("Статус:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    if isEditing {
+                        Picker("", selection: $selectedStatus) {
+                            ForEach(RequestStatus.allCases, id: \.self) { status in
+                                Text(status.rawValue).tag(status)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .font(.caption)
+                    } else {
+                        Text(request.status.rawValue)
+                            .font(.caption)
+                            .foregroundColor(statusColor(request.status))
+                    }
+                }
+                
+                HStack {
+                    Text("📅 \(request.dateRequested.formatted(date: .abbreviated, time: .shortened))")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text(urgencyEmoji(request.urgency) + " " + request.urgency.rawValue)
+                        .font(.caption2)
+                }
+            }
+            .padding(.vertical, 4)
+            .onChange(of: selectedStatus) { oldValue, newStatus in
+                if isEditing {
+                    if let index = storageManager.savedRequests.firstIndex(where: { $0.id == request.id }) {
+                        var updatedRequest = request
+                        updatedRequest.status = newStatus
+                        
+                        if newStatus == .completed {
+                            updatedRequest.dateCompleted = Date()
+                            // Простое уведомление вместо email (пока)
+                            print("✅ Заявка завершена: \(request.materialName)")
+                            print("📧 Готово к отправке email: \(notificationText(for: updatedRequest))")
+                        }
+                        
+                        storageManager.savedRequests[index] = updatedRequest
+                        storageManager.saveRequests()
+                    }
+                }
+            }
+        }
+        
+        // Все private функции ВНЕ body
+        func statusColor(_ status: RequestStatus) -> Color {
+            switch status {
+            case .pending: return .orange
+            case .inProgress: return .blue
+            case .completed: return .green
+            }
+        }
+        
+        func urgencyEmoji(_ urgency: MaterialRequest.UrgencyLevel) -> String {
+            switch urgency {
+            case .low: return "🟢"
+            case .medium: return "🟡"
+            case .high: return "🔴"
+            case .critical: return "🔥"
+            }
+        }
+        
+        private func notificationText(for request: MaterialRequest) -> String {
+            return """
+        ✅ ЗАЯВКА ВЫПОЛНЕНА
+        Материал: \(request.materialName)
+        Исполнитель: \(request.workerName)
+        """
+        }
+    }
+
