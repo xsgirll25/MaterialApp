@@ -1,0 +1,61 @@
+//
+//  NetworkManager.swift
+//  MaterialOrderApp
+//
+//  Created by xsyoulia on 18.09.2025.
+//
+
+internal import SwiftUI
+
+struct AddItemView: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var warehouse: WarehouseManager
+    @State private var name = ""
+    @State private var selectedMaterial: BuildingMaterial = .cement
+    @State private var quantityString = ""
+    @State private var unit = "шт"
+    let units = ["шт", "тн", "м³", "л", "кг", "упак"]
+    var body: some View {
+        NavigationStack {
+            Form {
+                Picker("Тип материала", selection: $selectedMaterial) {
+                    ForEach(BuildingMaterial.allCases, id: \.self) { mat in
+                        Text(mat.rawValue).tag(mat)
+                    }
+                }
+                TextField("Наименование", text: $name)
+                TextField("Количество", text: $quantityString)
+                    .keyboardType(.decimalPad)
+                Picker("Единица", selection: $unit) {
+                    ForEach(units, id: \.self) { u in
+                        Text(u).tag(u)
+                    }
+                }
+            }
+            .navigationTitle("Новый материал")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        saveItem()
+                    }
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Отмена") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    private func saveItem() {
+        guard let quantity = Double(quantityString), !name.isEmpty else { return }
+        let item = WarehouseItem(
+            material: selectedMaterial,
+            name: name,
+            quantity: quantity,
+            unit: unit
+        )
+        warehouse.addItem(item)
+        dismiss()
+    }
+}
